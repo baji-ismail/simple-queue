@@ -88,6 +88,10 @@ class Queue<T> {
 
   get_nowait(): T | undefined {
     const value = this.items.shift();
+    if (this.waitingPush.length > 0) {
+      const resolve = this.waitingPush.shift()!;
+      resolve();
+    }
     if (value) this.emit("itemRemoved", value);
     if (value && this.isEmpty()) this.emit("empty");
     return value;
@@ -177,6 +181,10 @@ class Queue<T> {
     else this.items.unshift(item);
 
     if (this.isFull()) this.emit("full");
+    if (this.waiting.length > 0) {
+      const resolve = this.waiting.shift()!;
+      resolve();
+    }
     this.emit("itemPushed", item);
   }
 

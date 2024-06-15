@@ -57,6 +57,24 @@ describe("Queue FIFO", () => {
     expect(queue.get_nowait()).toBe(2);
   });
 
+  it("should waiting remove items will received if add happen", async () => {
+    const waiting = queue.get();
+    queue.push_nowait(1); // no wating push will resolve the waiting get.
+    expect(await waiting).toBe(1);
+  }, 10); // 10ms is enough to this case.
+
+  it("should waiting remove items will received if add happen", async () => {
+    queue.setSize(2);
+    await queue.push(1);
+    await queue.push(2);
+    expect(queue.isFull()).toBe(true);
+    // this will be blocked while get has happpen because it's full.
+    const waiting = queue.push(3);
+    expect(queue.get_nowait()).toBe(1);
+    await waiting;
+    expect.anything();
+  }, 10); // 10ms is enough to this case.
+
   it("should add and remove items in batch correctly", async () => {
     queue.push(1);
     queue.push(2);
